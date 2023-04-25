@@ -8,15 +8,14 @@ using Zeebe.Client.Api.Worker;
 using Zeebe.Client.Impl.Builder;
 using NLog.Extensions.Logging;
 using CamundaTraining.Services;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.Json;
+
  
 namespace CamundaTraining.Workers
 {
     internal class Program
     {
-        
-        private static readonly string CLIENT_ID ="KqMiwG.25y.dbGMawihd1yYW2DAgn84y";
-        private static readonly string CLIENT_SECRET ="F1k.57wag365J21bXMeF7zgglN_vMYxN5EKEPqfC_-mh9Tqpj47p_sDpU2PEN29g";
-        private static readonly string ZEEBE_ADDRESS ="6f5078aa-c1ec-4698-b86a-f84e8536da63.bru-2.zeebe.camunda.io:443";
         private static readonly string JobCreditDeduction = "credit-deduction";
         private static readonly string JobChargeCreditCard = "credit-card-charging";
         private static readonly string WorkerName = Environment.MachineName;
@@ -24,12 +23,15 @@ namespace CamundaTraining.Workers
  
         public static async Task Main(string[] args)
         {
+            var confbuilder = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+            var config = confbuilder.Build();    
             // create zeebe client
             var client = CamundaCloudClientBuilder
                 .Builder()
-                .UseClientId(CLIENT_ID)
-                .UseClientSecret(CLIENT_SECRET)
-                .UseContactPoint(ZEEBE_ADDRESS)
+                .UseClientId(config["CLIENT_ID"])
+                .UseClientSecret(config["CLIENT_SECRET"])
+                .UseContactPoint(config["ZEEBE_ADDRESS"])
                 .UseLoggerFactory(new NLogLoggerFactory())
                 .Build();
 
@@ -83,6 +85,7 @@ namespace CamundaTraining.Workers
         {
             // business logic
             var jobKey = job.Key;
+            
             Console.WriteLine("Managing job: " + job); 
             jobClient.NewCompleteJobCommand(jobKey)
                     .Variables("{\"foo\":2}")
