@@ -19,8 +19,11 @@ namespace CamundaTraining.Workers
     {
         private static readonly string JobCreditDeduction = "credit-deduction";
         private static readonly string JobChargeCreditCard = "credit-card-charging";
+        private static readonly string JobPaymentInvocation = "payment-invocation";
+        private static readonly string JobPaymentCompleted = "payment-completion";
         private static readonly string WorkerName = Environment.MachineName;
         private static readonly long WorkCount = 100L;
+        private static IZeebeClient client;
  
         public static async Task Main(string[] args)
         {
@@ -28,7 +31,7 @@ namespace CamundaTraining.Workers
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
             var config = confbuilder.Build();    
             // create zeebe client
-            var client = CamundaCloudClientBuilder
+            client = CamundaCloudClientBuilder
                 .Builder()
                 .UseClientId(config["CLIENT_ID"])
                 .UseClientSecret(config["CLIENT_SECRET"])
@@ -63,11 +66,54 @@ namespace CamundaTraining.Workers
                       .Timeout(TimeSpan.FromSeconds(10))
                       .Open();
 
+                client.NewWorker()
+                      .JobType(JobPaymentInvocation)
+                      .Handler(HandleJobPaymentInvocation)
+                      .MaxJobsActive(5)
+                      .Name(WorkerName)
+                      .AutoCompletion()
+                      .PollInterval(TimeSpan.FromSeconds(1))
+                      .Timeout(TimeSpan.FromSeconds(10))
+                      .Open();
+
+                client.NewWorker()
+                      .JobType(JobPaymentCompleted)
+                      .Handler(HandleJobPaymentCompletion)
+                      .MaxJobsActive(5)
+                      .Name(WorkerName)
+                      .AutoCompletion()
+                      .PollInterval(TimeSpan.FromSeconds(1))
+                      .Timeout(TimeSpan.FromSeconds(10))
+                      .Open();
+
                 // blocks main thread, so that worker can run
                 signal.WaitOne();
             }
              
         }
+        //Start Payment Process with message
+        private async static void HandleJobPaymentInvocation(IJobClient jobClient, IJob job)
+        {
+            var variablesObj = JsonSerializer.Deserialize<MyVar>(job.Variables);
+            await client.NewPublishMessageCommand()
+                    .MessageName("paymentRequestMessage")
+                    .CorrelationKey("useless")
+                    .Variables(job.Variables)
+                    .Send();
+        }  
+
+        //Send correlation message back to OrderProcess
+        private async static void HandleJobPaymentCompletion(IJobClient jobClient, IJob job)
+        {
+            var variablesObj = JsonSerializer.Deserialize<MyVar>(job.Variables);
+            await client.NewPublishMessageCommand()
+                    .MessageName("paymentCompletedMessage")
+                    .CorrelationKey(variablesObj.orderId)
+                    .Variables(job.Variables)
+                    .Send();
+        }   
+
+  
 
         private static void HandleJobCreditDeduction(IJobClient jobClient, IJob job)
         {
