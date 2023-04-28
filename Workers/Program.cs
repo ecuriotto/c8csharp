@@ -97,7 +97,7 @@ namespace CamundaTraining.Workers
             var variablesObj = JsonSerializer.Deserialize<MyVar>(job.Variables);
             await client.NewPublishMessageCommand()
                     .MessageName("paymentRequestMessage")
-                    .CorrelationKey("useless")
+                    .CorrelationKey("useless") //start process doesn't require 
                     .Variables(job.Variables)
                     .Send();
         }  
