@@ -23,7 +23,7 @@ namespace CamundaTraining.Workers
         private static readonly string JobPaymentInvocation = "payment-invocation";
         private static readonly string JobPaymentCompleted = "payment-completion";
 
-        private static readonly string ZeebeUrl = "camunda-zeebe-gateway-grpc.how-testbedcamunda.ocp-1.nbyt.fr";
+        private static readonly string ZeebeUrl = "**** your url here ****";
         private static readonly string WorkerName = Environment.MachineName;
         private static readonly long WorkCount = 100L;
         private static IZeebeClient client;
