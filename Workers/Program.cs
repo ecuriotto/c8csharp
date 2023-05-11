@@ -97,7 +97,7 @@ namespace CamundaTraining.Workers
             var variablesObj = JsonSerializer.Deserialize<MyVar>(job.Variables);
             await client.NewPublishMessageCommand()
                     .MessageName("paymentRequestMessage")
-                    .CorrelationKey("useless") //start process doesn't require 
+                    .CorrelationKey(variablesObj.orderId) //start process doesn't require 
                     .Variables(job.Variables)
                     .Send();
         }  
@@ -168,18 +168,22 @@ namespace CamundaTraining.Workers
                 
             }
             catch(InvalidCreditCardException ie){
-                jobClient.NewFailCommand(jobKey)
-                .Retries(job.Retries -1)
-                .RetryBackOff(TimeSpan.FromSeconds(30))
+                jobClient.NewThrowErrorCommand(jobKey)
+                .ErrorCode("creditCardChargeError")
                 .ErrorMessage("Credit card expiry date pas correcte")
                 .Send()
                 .GetAwaiter()
                 .GetResult();
-
-
             }
-            
-        
+            catch(Exception e){
+                jobClient.NewFailCommand(jobKey)
+                .Retries(job.Retries -1)
+                .RetryBackOff(TimeSpan.FromSeconds(30))
+                .ErrorMessage("Exception generique")
+                .Send()
+                .GetAwaiter()
+                .GetResult();
+            }            
     }
 }
 }
