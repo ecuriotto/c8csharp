@@ -1,0 +1,51 @@
+{
+  "components": [
+    {
+      "text": "##Check the failed payment",
+      "type": "text",
+      "id": "Field_1ss6017"
+    },
+    {
+      "label": "Card number",
+      "type": "textfield",
+      "id": "Field_1i0hi6u",
+      "key": "cardNumber",
+      "description": "card number",
+      "disabled": false
+    },
+    {
+      "label": "customer Credit",
+      "type": "textfield",
+      "id": "Field_0ef5t68",
+      "key": "customerCredit",
+      "disabled": false
+    },
+    {
+      "label": "Expiry date",
+      "type": "textfield",
+      "id": "Field_19sug4s",
+      "key": "expiryDate"
+    },
+    {
+      "label": "order Total",
+      "type": "number",
+      "id": "Field_07tcdna",
+      "key": "orderTotal"
+    },
+    {
+      "label": "Error resolved?",
+      "type": "checkbox",
+      "id": "Field_17vqjcu",
+      "key": "errorResolved"
+    }
+  ],
+  "type": "default",
+  "id": "errorCheckForm",
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.1.0",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.7.0"
+  },
+  "schemaVersion": 6
+}
