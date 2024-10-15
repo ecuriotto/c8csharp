@@ -30,3 +30,5 @@ build/
 *.vs
 
 appsettings.json
+
+.DS_Store
